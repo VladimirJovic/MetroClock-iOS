@@ -1,24 +1,25 @@
-//
-//  ContentView.swift
-//  MetroClock
-//
-//  Created by Vlada Jovic on 6. 3. 2026..
-//
-
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(AuthService.self) var authService
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        if authService.isAuthenticated {
+            switch authService.currentUser?.role {
+            case .admin:
+                VStack {
+                    Text("Admin panel - coming soon")
+                    Button("Logout") { authService.logout() }
+                }
+            case .manager:
+                ManagerHomeView()
+            case .employee:
+                EmployeeHomeView()
+            case .none:
+                LoginView()
+            }
+        } else {
+            LoginView()
         }
-        .padding()
     }
-}
-
-#Preview {
-    ContentView()
 }

@@ -6,13 +6,34 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8475E2F32F5B80F0004A1952 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 8475E2F22F5B80F0004A1952 /* FirebaseAuth */; };
+		8475E2F52F5B80F0004A1952 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 8475E2F42F5B80F0004A1952 /* FirebaseFirestore */; };
+		8475E2F72F5B80F0004A1952 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 8475E2F62F5B80F0004A1952 /* FirebaseMessaging */; };
+		8475E3362F5BCBF9004A1952 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 8475E3352F5BCBF9004A1952 /* FirebaseStorage */; };
+		8475E3392F5BD2B4004A1952 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 8475E3382F5BD2B4004A1952 /* Kingfisher */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		8475E2DF2F5B7C39004A1952 /* MetroClock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetroClock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		8475E33F2F5CAD91004A1952 /* Exceptions for "MetroClock" folder in "MetroClock" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 8475E2DE2F5B7C39004A1952 /* MetroClock */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8475E2E12F5B7C39004A1952 /* MetroClock */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8475E33F2F5CAD91004A1952 /* Exceptions for "MetroClock" folder in "MetroClock" target */,
+			);
 			path = MetroClock;
 			sourceTree = "<group>";
 		};
@@ -23,6 +44,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8475E2F72F5B80F0004A1952 /* FirebaseMessaging in Frameworks */,
+				8475E3362F5BCBF9004A1952 /* FirebaseStorage in Frameworks */,
+				8475E2F32F5B80F0004A1952 /* FirebaseAuth in Frameworks */,
+				8475E2F52F5B80F0004A1952 /* FirebaseFirestore in Frameworks */,
+				8475E3392F5BD2B4004A1952 /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +59,7 @@
 			isa = PBXGroup;
 			children = (
 				8475E2E12F5B7C39004A1952 /* MetroClock */,
+				8475E3342F5BCBF9004A1952 /* Frameworks */,
 				8475E2E02F5B7C39004A1952 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +70,13 @@
 				8475E2DF2F5B7C39004A1952 /* MetroClock.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		8475E3342F5BCBF9004A1952 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -65,6 +99,11 @@
 			);
 			name = MetroClock;
 			packageProductDependencies = (
+				8475E2F22F5B80F0004A1952 /* FirebaseAuth */,
+				8475E2F42F5B80F0004A1952 /* FirebaseFirestore */,
+				8475E2F62F5B80F0004A1952 /* FirebaseMessaging */,
+				8475E3352F5BCBF9004A1952 /* FirebaseStorage */,
+				8475E3382F5BD2B4004A1952 /* Kingfisher */,
 			);
 			productName = MetroClock;
 			productReference = 8475E2DF2F5B7C39004A1952 /* MetroClock.app */;
@@ -94,6 +133,10 @@
 			);
 			mainGroup = 8475E2D62F5B7C39004A1952;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8475E2F12F5B80F0004A1952 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				8475E3372F5BD2B4004A1952 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 8475E2E02F5B7C39004A1952 /* Products */;
 			projectDirPath = "";
@@ -251,11 +294,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MetroClock/MetroClock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2KNKFNDT2F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MetroClock/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "MetroClock needs your location to verify you are at the office.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "MetroClock needs access to your photo library.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -283,11 +330,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MetroClock/MetroClock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2KNKFNDT2F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MetroClock/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "MetroClock needs your location to verify you are at the office.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "MetroClock needs access to your photo library.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -332,6 +383,53 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8475E2F12F5B80F0004A1952 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.10.0;
+			};
+		};
+		8475E3372F5BD2B4004A1952 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.8.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8475E2F22F5B80F0004A1952 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8475E2F12F5B80F0004A1952 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		8475E2F42F5B80F0004A1952 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8475E2F12F5B80F0004A1952 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		8475E2F62F5B80F0004A1952 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8475E2F12F5B80F0004A1952 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		8475E3352F5BCBF9004A1952 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8475E2F12F5B80F0004A1952 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+		8475E3382F5BD2B4004A1952 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8475E3372F5BD2B4004A1952 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8475E2D72F5B7C39004A1952 /* Project object */;
 }
