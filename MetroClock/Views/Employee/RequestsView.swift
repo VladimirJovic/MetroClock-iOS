@@ -3,6 +3,9 @@ import FirebaseFirestore
 
 struct RequestsView: View {
     @Environment(AuthService.self) var authService
+    var workspaceService: WorkspaceService
+    var taskService: TaskService
+
     @State private var requests: [Request] = []
     @State private var isLoading = true
     @State private var showNewRequest = false
@@ -45,9 +48,12 @@ struct RequestsView: View {
                 }
             }
             .sheet(isPresented: $showNewRequest) {
-                NewRequestSheet(onSubmit: { type, date, note, hours in
-                    submitRequest(type: type, date: date, note: note, hours: hours)
-                })
+                NewRequestSheet(
+                    taskService: taskService,
+                    onSubmit: { type, date, note, hours, taskIds in
+                        submitRequest(type: type, date: date, note: note, hours: hours, taskIds: taskIds)
+                    }
+                )
             }
         }
     }
@@ -78,11 +84,10 @@ struct RequestsView: View {
             }
     }
 
-    func submitRequest(type: RequestType, date: Date, note: String, hours: Double?) {
+    func submitRequest(type: RequestType, date: Date, note: String, hours: Double?, taskIds: [String]) {
         guard let user = authService.currentUser else { return }
         let db = Firestore.firestore()
 
-        // Duplicate check samo za sickLeave i dayOff, ne za remoteWork
         if type != .remoteWork {
             let calendar = Calendar.current
             let duplicate = requests.first { req in
@@ -105,6 +110,9 @@ struct RequestsView: View {
         if type == .remoteWork, let h = hours {
             data["remoteHours"] = h
         }
+        if !taskIds.isEmpty {
+            data["taskIds"] = taskIds
+        }
 
         db.collection("requests").addDocument(data: data) { error in
             if error == nil {
@@ -115,30 +123,32 @@ struct RequestsView: View {
     }
 }
 
+// MARK: - RequestRowView
+
 struct RequestRowView: View {
     var request: Request
 
     var typeLabel: String {
         switch request.type {
         case .remoteWork: return "Remote Work"
-        case .sickLeave: return "Sick Leave"
-        case .dayOff: return "Day Off"
-        case .overtime: return "Overtime"
+        case .sickLeave:  return "Sick Leave"
+        case .dayOff:     return "Day Off"
+        case .overtime:   return "Overtime"
         }
     }
 
     var typeIcon: String {
         switch request.type {
         case .remoteWork: return "house.fill"
-        case .sickLeave: return "cross.fill"
-        case .dayOff: return "sun.max.fill"
-        case .overtime: return "clock.badge.exclamationmark.fill"
+        case .sickLeave:  return "cross.fill"
+        case .dayOff:     return "sun.max.fill"
+        case .overtime:   return "clock.badge.exclamationmark.fill"
         }
     }
 
     var statusColor: Color {
         switch request.status {
-        case .pending: return .orange
+        case .pending:  return .orange
         case .approved: return .green
         case .rejected: return .red
         }
@@ -146,7 +156,7 @@ struct RequestRowView: View {
 
     var statusLabel: String {
         switch request.status {
-        case .pending: return "Pending"
+        case .pending:  return "Pending"
         case .approved: return "Approved"
         case .rejected: return "Rejected"
         }
@@ -161,7 +171,6 @@ struct RequestRowView: View {
                 Image(systemName: typeIcon)
                     .foregroundStyle(statusColor)
             }
-
             VStack(alignment: .leading, spacing: 4) {
                 Text(typeLabel)
                     .font(.subheadline)
@@ -176,9 +185,7 @@ struct RequestRowView: View {
                         .lineLimit(1)
                 }
             }
-
             Spacer()
-
             Text(statusLabel)
                 .font(.caption)
                 .fontWeight(.semibold)
@@ -192,14 +199,18 @@ struct RequestRowView: View {
     }
 }
 
+// MARK: - NewRequestSheet
+
 struct NewRequestSheet: View {
-    var onSubmit: (RequestType, Date, String, Double?) -> Void
+    var taskService: TaskService
+    var onSubmit: (RequestType, Date, String, Double?, [String]) -> Void
     @Environment(\.dismiss) var dismiss
 
     @State private var selectedType: RequestType = .remoteWork
     @State private var selectedDate = Date()
     @State private var note = ""
     @State private var remoteHours: Double = 8
+    @State private var selectedTasks: Set<ExternalTask> = []
 
     var body: some View {
         NavigationStack {
@@ -232,6 +243,39 @@ struct NewRequestSheet: View {
                             }
                         }
                     }
+
+                    // Task selection — only for remote work and if tasks are available
+                    if taskService.isAvailable && !taskService.tasks.isEmpty {
+                        Section("Tasks (optional)") {
+                            ForEach(taskService.tasks) { task in
+                                Button {
+                                    if selectedTasks.contains(task) {
+                                        selectedTasks.remove(task)
+                                    } else {
+                                        selectedTasks.insert(task)
+                                    }
+                                } label: {
+                                    HStack(spacing: 12) {
+                                        Image(systemName: selectedTasks.contains(task) ? "checkmark.circle.fill" : "circle")
+                                            .foregroundStyle(selectedTasks.contains(task) ? .blue : .secondary)
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(task.name)
+                                                .font(.subheadline)
+                                                .foregroundStyle(.primary)
+                                                .lineLimit(2)
+                                            if let list = task.listName {
+                                                Text(list)
+                                                    .font(.caption)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                        }
+                                        Spacer()
+                                    }
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
                 }
 
                 Section("Note") {
@@ -248,7 +292,8 @@ struct NewRequestSheet: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Submit") {
                         let hours: Double? = selectedType == .remoteWork ? remoteHours : nil
-                        onSubmit(selectedType, selectedDate, note, hours)
+                        let taskIds = selectedTasks.map { $0.id }
+                        onSubmit(selectedType, selectedDate, note, hours, taskIds)
                     }
                 }
             }

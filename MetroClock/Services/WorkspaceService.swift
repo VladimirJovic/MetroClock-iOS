@@ -11,11 +11,32 @@ struct MCOffice: Identifiable {
     var gpsRadius: Double
 }
 
+struct WorkspaceConfig {
+    var clickupApiToken: String?
+    var clickupUserMappings: [String: String]   // metroClockUserId → clickupUserId
+    var slackWebhookUrl: String?
+    var discordWebhookUrl: String?
+    var slackUserMappings: [String: String]
+    var discordUserMappings: [String: String]
+
+    var hasClickUp: Bool { clickupApiToken != nil }
+
+    init() {
+        clickupApiToken = nil
+        clickupUserMappings = [:]
+        slackWebhookUrl = nil
+        discordWebhookUrl = nil
+        slackUserMappings = [:]
+        discordUserMappings = [:]
+    }
+}
+
 @Observable
 class WorkspaceService: NSObject, CLLocationManagerDelegate {
     var offices: [MCOffice] = []
+    var config: WorkspaceConfig = WorkspaceConfig()
     var currentLocation: CLLocation?
-    var nearestOffice: MCOffice? = nil   // office user is currently inside GPS zone of
+    var nearestOffice: MCOffice? = nil
     var isInOfficeZone: Bool = false
     var locationAuthStatus: CLAuthorizationStatus = .notDetermined
 
@@ -27,6 +48,29 @@ class WorkspaceService: NSObject, CLLocationManagerDelegate {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
     }
+
+    // MARK: - Workspace Config
+
+    func fetchWorkspaceConfig(workspaceId: String) {
+        db.collection("workspaces").document(workspaceId).getDocument { [weak self] snapshot, error in
+            guard let self = self, let data = snapshot?.data() else { return }
+            var cfg = WorkspaceConfig()
+            cfg.clickupApiToken = data["clickupApiToken"] as? String
+            cfg.slackWebhookUrl = data["slackWebhookUrl"] as? String
+            cfg.discordWebhookUrl = data["discordWebhookUrl"] as? String
+            if let m = data["clickupUserMappings"] as? [String: String] { cfg.clickupUserMappings = m }
+            if let m = data["slackUserMappings"] as? [String: String] { cfg.slackUserMappings = m }
+            if let m = data["discordUserMappings"] as? [String: String] { cfg.discordUserMappings = m }
+            self.config = cfg
+        }
+    }
+
+    // Returns the ClickUp user ID for a given MetroClock user ID
+    func clickupUserId(for metroUserId: String) -> String? {
+        config.clickupUserMappings[metroUserId]
+    }
+
+    // MARK: - Offices
 
     func fetchOffices(workspaceId: String) {
         db.collection("offices")
@@ -48,6 +92,8 @@ class WorkspaceService: NSObject, CLLocationManagerDelegate {
                 self.checkIfInOfficeZone()
             }
     }
+
+    // MARK: - Location
 
     func startLocationUpdates() {
         switch locationManager.authorizationStatus {
@@ -93,9 +139,7 @@ class WorkspaceService: NSObject, CLLocationManagerDelegate {
         nearestOffice = nil
     }
 
-    // Call this to check WiFi match for a given office SSID
     func isOnOfficeWiFi(ssid: String) -> Bool {
-        // WiFiService will handle actual SSID check — this is just helper
         return !ssid.isEmpty
     }
 }

@@ -40,15 +40,18 @@ class ClockService {
             }
     }
 
-    func clockIn(userId: String, workspaceId: String, locationId: String) {
+    func clockIn(userId: String, workspaceId: String, locationId: String, taskIds: [String]? = nil) {
         isLoading = true
-        let event: [String: Any] = [
+        var event: [String: Any] = [
             "userId": userId,
             "workspaceId": workspaceId,
             "type": "clockIn",
             "timestamp": Timestamp(date: Date()),
             "locationId": locationId
         ]
+        if let taskIds = taskIds, !taskIds.isEmpty {
+            event["taskIds"] = taskIds
+        }
         db.collection("clockEvents").addDocument(data: event) { [weak self] error in
             guard let self = self else { return }
             self.isLoading = false
