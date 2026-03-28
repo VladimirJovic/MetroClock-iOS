@@ -8,24 +8,28 @@ struct MyHoursView: View {
     
     var body: some View {
         NavigationStack {
-            Group {
-                if isLoading {
-                    ProgressView()
-                } else if records.isEmpty {
-                    VStack(spacing: 12) {
-                        Image(systemName: "calendar.badge.clock")
-                            .font(.system(size: 48))
-                            .foregroundStyle(.secondary)
-                        Text("No records yet")
-                            .foregroundStyle(.secondary)
-                    }
-                } else {
-                    List {
-                        ForEach(records) { day in
-                            DayRowView(day: day)
+            ZStack { Color.mcBackground.ignoresSafeArea()
+                Group {
+                    if isLoading {
+                        ProgressView().tint(Color.mcOrange)
+                    } else if records.isEmpty {
+                        VStack(spacing: 12) {
+                            Image(systemName: "calendar.badge.clock")
+                                .font(.system(size: 48))
+                                .foregroundStyle(Color.mcTextTertiary)
+                            Text("No records yet")
+                                .foregroundStyle(Color.mcTextSecondary)
                         }
+                    } else {
+                        List {
+                            ForEach(records) { day in
+                                DayRowView(day: day)
+                                    .listRowBackground(Color.mcSurface)
+                            }
+                        }
+                        .listStyle(.insetGrouped)
+                        .scrollContentBackground(.hidden)
                     }
-                    .listStyle(.insetGrouped)
                 }
             }
             .navigationTitle("My Hours")
@@ -224,8 +228,8 @@ struct DayRowView: View {
                                 .fontWeight(.semibold)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 8)
-                                .background(Color.blue.opacity(0.12))
-                                .foregroundStyle(.blue)
+                                .background(Color.mcOrange.opacity(0.12))
+                                .foregroundStyle(Color.mcOrange)
                                 .cornerRadius(8)
                         }
                         .buttonStyle(.plain)

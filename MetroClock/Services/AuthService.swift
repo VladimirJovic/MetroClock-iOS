@@ -88,7 +88,6 @@ class AuthService {
                 role: UserRole(rawValue: data["role"] as? String ?? "employee") ?? .employee,
                 workspaceId: data["workspaceId"] as? String ?? "",
                 managerId: data["managerId"] as? String,
-                profileImageURL: data["profileImageURL"] as? String,
                 isActive: data["isActive"] as? Bool ?? true,
                 workDays: workDays,
                 dailyHours: dailyHours,
@@ -106,6 +105,7 @@ class AuthService {
 
             self.currentUser = user
             self.isAuthenticated = true
+            NotificationService.shared.saveToken(userId: user.id)
         }
     }
 }

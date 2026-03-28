@@ -32,7 +32,17 @@ class TaskService {
     var errorMessage: String? = nil
     var isAvailable: Bool = false
 
+    private var lastConfig: WorkspaceConfig?
+    private var lastMetroUserId: String?
+
+    func refresh() {
+        guard let config = lastConfig, let userId = lastMetroUserId else { return }
+        fetchTasks(config: config, metroUserId: userId)
+    }
+
     func fetchTasks(config: WorkspaceConfig, metroUserId: String) {
+        lastConfig = config
+        lastMetroUserId = metroUserId
         tasks = []
         errorMessage = nil
 

@@ -15,9 +15,10 @@ class ClockService {
         let startOfDay = Calendar.current.startOfDay(for: Date())
         db.collection("clockEvents")
             .whereField("userId", isEqualTo: userId)
+            .whereField("timestamp", isGreaterThanOrEqualTo: Timestamp(date: startOfDay))
             .getDocuments { [weak self] snapshot, error in
                 guard let self = self else { return }
-                let allEvents: [ClockEvent] = snapshot?.documents.compactMap { doc in
+                let events: [ClockEvent] = snapshot?.documents.compactMap { doc in
                     let data = doc.data()
                     return ClockEvent(
                         id: doc.documentID,
@@ -32,9 +33,7 @@ class ClockService {
                         correctedHours: data["correctedHours"] as? Double
                     )
                 } ?? []
-                self.todayEvents = allEvents
-                    .filter { $0.timestamp >= startOfDay }
-                    .sorted { $0.timestamp < $1.timestamp }
+                self.todayEvents = events.sorted { $0.timestamp < $1.timestamp }
                 self.lastClockIn = self.todayEvents.last(where: { $0.type == .clockIn })
                 self.isClockedIn = self.todayEvents.last?.type == .clockIn
             }
@@ -55,7 +54,12 @@ class ClockService {
         db.collection("clockEvents").addDocument(data: event) { [weak self] error in
             guard let self = self else { return }
             self.isLoading = false
-            if error == nil { self.fetchTodayEvents(userId: userId) }
+            if let error = error {
+                self.errorMessage = "Failed to clock in. Please check your connection and try again."
+                print("Clock in error: \(error.localizedDescription)")
+            } else {
+                self.fetchTodayEvents(userId: userId)
+            }
         }
     }
 
@@ -85,23 +89,30 @@ class ClockService {
 
             self.db.collection("clockEvents").addDocument(data: event) { error in
                 self.isLoading = false
-                if error == nil {
-                    if isOvertime, let managerId = managerId, let note = overtimeNote {
-                        let request: [String: Any] = [
-                            "userId": userId,
-                            "workspaceId": workspaceId,
-                            "managerId": managerId,
-                            "type": "overtime",
-                            "status": "pending",
-                            "date": Timestamp(date: Date()),
-                            "employeeNote": note,
-                            "overtimeHours": overtimeAmount,
-                            "createdAt": Timestamp(date: Date())
-                        ]
-                        self.db.collection("requests").addDocument(data: request)
-                    }
-                    self.fetchTodayEvents(userId: userId)
+                if let error = error {
+                    self.errorMessage = "Failed to clock out. Please check your connection and try again."
+                    print("Clock out error: \(error.localizedDescription)")
+                    return
                 }
+                if isOvertime, let managerId = managerId, let note = overtimeNote {
+                    let request: [String: Any] = [
+                        "userId": userId,
+                        "workspaceId": workspaceId,
+                        "managerId": managerId,
+                        "type": "overtime",
+                        "status": "pending",
+                        "date": Timestamp(date: Date()),
+                        "employeeNote": note,
+                        "overtimeHours": overtimeAmount,
+                        "createdAt": Timestamp(date: Date())
+                    ]
+                    self.db.collection("requests").addDocument(data: request) { err in
+                        if let err = err {
+                            print("Overtime request failed: \(err.localizedDescription)")
+                        }
+                    }
+                }
+                self.fetchTodayEvents(userId: userId)
             }
         }
     }

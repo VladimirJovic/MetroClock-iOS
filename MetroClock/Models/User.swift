@@ -14,7 +14,6 @@ struct MCUser: Codable, Identifiable {
     var role: UserRole
     var workspaceId: String
     var managerId: String?
-    var profileImageURL: String?
     var isActive: Bool
 
     // Schedule
